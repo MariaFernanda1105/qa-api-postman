@@ -1,0 +1,53 @@
+{
+  "info": {
+    "_postman_id": "af891ca7-56cc-45d4-8c89-7dd3c413ee12",
+    "name": "QA API - JSONPlaceholder",
+    "description": "Coleção demonstrativa de testes de API: listagem, detalhe, recurso inexistente e criação simulada. Não requer credenciais.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Listar posts",
+      "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/posts", "host": ["{{baseUrl}}"], "path": ["posts"] } },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Retorna HTTP 200', function () { pm.response.to.have.status(200); });",
+        "pm.test('Retorna uma lista não vazia de posts', function () { const body = pm.response.json(); pm.expect(body).to.be.an('array').that.is.not.empty; });",
+        "pm.test('Cada post inclui identificadores e título', function () { const body = pm.response.json(); pm.expect(body[0]).to.have.property('id'); pm.expect(body[0]).to.have.property('userId'); pm.expect(body[0].title).to.be.a('string').and.not.empty; });"
+      ] } }]
+    },
+    {
+      "name": "Consultar post existente",
+      "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/posts/1", "host": ["{{baseUrl}}"], "path": ["posts", "1"] } },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Retorna HTTP 200', function () { pm.response.to.have.status(200); });",
+        "pm.test('O identificador retornado é 1', function () { const body = pm.response.json(); pm.expect(body.id).to.eql(1); pm.expect(body.title).to.be.a('string').and.not.empty; });"
+      ] } }]
+    },
+    {
+      "name": "Consultar post inexistente (negativo)",
+      "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/posts/999", "host": ["{{baseUrl}}"], "path": ["posts", "999"] } },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Recurso inexistente retorna HTTP 404', function () { pm.response.to.have.status(404); });"
+      ] } }]
+    },
+    {
+      "name": "Criar post (operação simulada)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"title\": \"{{newPostTitle}}\",\n  \"body\": \"{{newPostBody}}\",\n  \"userId\": {{userId}}\n}", "options": { "raw": { "language": "json" } } },
+        "url": { "raw": "{{baseUrl}}/posts", "host": ["{{baseUrl}}"], "path": ["posts"] }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Criação simulada retorna HTTP 201', function () { pm.response.to.have.status(201); });",
+        "pm.test('Resposta ecoa os dados enviados e inclui id', function () { const body = pm.response.json(); pm.expect(body).to.have.property('id'); pm.expect(body.title).to.eql(pm.environment.get('newPostTitle')); pm.expect(body.body).to.eql(pm.environment.get('newPostBody')); pm.expect(body.userId).to.eql(Number(pm.environment.get('userId'))); });"
+      ] } }]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "https://jsonplaceholder.typicode.com" },
+    { "key": "newPostTitle", "value": "Teste automatizado de API" },
+    { "key": "newPostBody", "value": "Post demonstrativo criado pela coleção" },
+    { "key": "userId", "value": "1" }
+  ]
+}
